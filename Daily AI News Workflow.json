@@ -1,0 +1,459 @@
+{
+  "name": "Daily AI News Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "sonar-pro",
+        "messages": {
+          "message": [
+            {
+              "content": "=Fetch the most important AI news from the last 24 hours as of {{$today}}, covering major AI players such as ChatGPT, Gemini, Perplexity, Deepseek, Grok, Claude, and Google. Focus on news like product launches, updates, and breakthroughs (e.g., 'Google releasing Google Antigravity,' 'ChatGPT launched GPT5.1 features'). Provide headlines with 1-2 sentence summaries and include links for further reading. Remove any duplicated news items from different sources and format the response cleanly mentioning 'Today' with the date",
+              "role": "=system"
+            },
+            {
+              "content": "=Get AI news updates from the past 24 hours on major AI players: For Reference: Today is {{ $today }}.\n\nChatGPT, Gemini, Perplexity, Deepseek, Grok, Claude, and Google. Summarize key highlights with links. Avoid duplicate stories"
+            }
+          ]
+        },
+        "options": {
+          "searchRecency": "day"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexity",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -176
+      ],
+      "id": "17ef34ef-534e-48c1-9d78-8be97c159553",
+      "name": "Message a model",
+      "credentials": {
+        "perplexityApi": {
+          "id": "wxIBkx5fi4F5iqrj",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are an AI assistant helping to create a daily AI news update email. Refer to the Google Sheet data from sheet \"Daily AI News\" to identify if any news headline or link already exists (using data passed as input). If duplicate entries are found, avoid repeating them. Format the final news list in a clean, appealing style inspired by Apple’s crisp and minimal design. Compose a brief, engaging email starting with, 'Thanks for subscribing to AI Buddy Tamil.' Present the latest or breaking AI news from the last 24 hours succinctly for the audience. Keep the tone professional, clear, and concise."
+            },
+            {
+              "content": "=Here is today's AI news list from Perplexity:\n\n{{ $json.choices[0].message.content }}\n\nCheck the following news items against the Google Sheet for duplicates and remove repeated entries. Then, compose a short and appealing email update to subscribers including the fresh AI news items, thanking them for subscribing to 'AI Buddy Tamil.' Use an Apple-style clean format and keep the message brief but impactful\n\n#### Output Format:\nOutput in text only, and starts the daily news summary with \n\"Here is the latest AI development news. Today is {{ $today }} \""
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -176
+      ],
+      "id": "3a0738a9-dc0f-4495-b4f4-4e9a033c2156",
+      "name": "AI model to formatting",
+      "credentials": {
+        "openAiApi": {
+          "id": "eWAAnCHl8HKoUVRZ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -80,
+        -48
+      ],
+      "id": "10982c8c-84dd-499b-8811-1615f08fdc94",
+      "name": "Past AI News logs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HJcFdK2nje2Aipwq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "azamjm1993@gmail.com, faheerasadik@gmail.com",
+        "subject": "Daily AI News",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        -192
+      ],
+      "id": "94c5b0a4-565e-4a39-80f9-6ab5f89446dc",
+      "name": "Send a message",
+      "webhookId": "fd08edfd-d613-41ac-9810-f060ceceea3c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "s94ZYxBfUX7IVw5T",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -592,
+        -176
+      ],
+      "id": "97d8eda9-2743-478c-8752-12d6fa8abd2a",
+      "name": "When chat message received",
+      "webhookId": "96974694-de9d-49ba-93d3-3b31e79c1f50"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Daily AI News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MWFZNbe_H1w-5mj0ZDN5hMggAKTmnXWeUb0aDZaXNfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $today }}",
+            "Headlines": "={{ $('AI model to formatting').item.json.output[0].content[0].text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Headlines",
+              "displayName": "Headlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        -160
+      ],
+      "id": "785033d8-f98a-4a2e-9eee-948b0e7e4ee0",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HJcFdK2nje2Aipwq",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Message a model": [
+      {
+        "json": {
+          "id": "6998fb97-12e2-434c-80d6-493f55b4291c",
+          "model": "sonar-pro",
+          "created": 1764933470,
+          "usage": {
+            "prompt_tokens": 205,
+            "completion_tokens": 556,
+            "total_tokens": 761,
+            "search_context_size": "low",
+            "cost": {
+              "input_tokens_cost": 0.001,
+              "output_tokens_cost": 0.008,
+              "request_cost": 0.006,
+              "total_cost": 0.015
+            }
+          },
+          "citations": [
+            "https://www.aiapps.com/blog/ai-news-december-2025-breakthroughs-launches-trends/",
+            "https://www.youtube.com/watch?v=aMcoJorAdTM",
+            "https://www.vaticannews.va/en/pope/news/2025-12/pope-leo-xiv-artificial-intelligence-young-society-technology.html",
+            "https://www.france24.com/en/live-news/20251205-softbank-s-son-says-super-ai-could-make-humans-like-fish-win-nobel-prize-1"
+          ],
+          "search_results": [
+            {
+              "title": "Top AI News for December 2025: Breakthroughs, Launches ...",
+              "url": "https://www.aiapps.com/blog/ai-news-december-2025-breakthroughs-launches-trends/",
+              "date": "2025-12-03",
+              "snippet": "AI is transforming industries and daily life with faster diagnostics in healthcare, smarter tools for education and marketing, and advanced multilingual communication. Businesses are integrating AI into operations, while regulations are shaping ethical practices. Key highlights:... Healthcare: AI im...",
+              "source": "web"
+            },
+            {
+              "title": "Chinese AI Chipmaker Soars On Trading Debut - YouTube",
+              "url": "https://www.youtube.com/watch?v=aMcoJorAdTM",
+              "date": "2025-12-05",
+              "snippet": "Meanwhile, Canberra plans to more than triple its production of semiconductors {ts:38} to fill the NVIDIA void. And the French president, Emmanuel Macron, urges China to invest more in Europe as he and Xi Jinping visit the city of Chengdu. Well, welcome to Friday Morning Action today.... fairly stea...",
+              "source": "web"
+            },
+            {
+              "title": "Pope Leo on AI: new generations must be helped, not hindered",
+              "url": "https://www.vaticannews.va/en/pope/news/2025-12/pope-leo-xiv-artificial-intelligence-young-society-technology.html",
+              "date": "2025-12-05",
+              "snippet": "He was addressing participants in the Conference “Artificial Intelligence and Care for Our Common Home” on Friday, December 5, 2025. “The ability to access ...",
+              "source": "web"
+            },
+            {
+              "title": "Softbank's Son says super AI could make humans like fish, win Nobel Prize",
+              "url": "https://www.france24.com/en/live-news/20251205-softbank-s-son-says-super-ai-could-make-humans-like-fish-win-nobel-prize-1",
+              "date": "2025-12-05",
+              "snippet": "SoftBank CEO and AI investor Masayoshi Son said Friday that advanced artificial intelligence could surpass humans to the extent that \"we ...",
+              "source": "web"
+            }
+          ],
+          "object": "chat.completion",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Here are the key AI news highlights from the past 24 hours for major AI players, including ChatGPT, Gemini, Perplexity, Deepseek, Grok, Claude, and Google, with unique stories and links:\n\n### ChatGPT and OpenAI\nOpenAI has announced new enterprise features for ChatGPT, focusing on enhanced security, compliance, and integration with major business platforms. These updates are aimed at making ChatGPT more suitable for regulated industries like finance and healthcare, with improved audit trails and data privacy controls[2].\n\n### Gemini and Google\nGoogle has rolled out a major update to its Gemini AI platform, introducing real-time multilingual translation and advanced sentiment analysis for customer service applications. The update also includes new tools for marketers to automate content creation and analyze audience engagement across global markets[2].\n\n### Perplexity AI\nPerplexity AI has launched a new research assistant feature that integrates with academic databases and scientific journals, allowing users to generate summaries and citations for research papers directly within the platform. This update is designed to streamline academic workflows and improve research productivity[2].\n\n### Deepseek\nDeepseek has released a new version of its large language model, Deepseek-V3, which boasts improved reasoning capabilities and reduced computational requirements. The model is now available for commercial use, with a focus on applications in legal, medical, and technical domains[2].\n\n### Grok (xAI)\nElon Musk’s xAI has announced that Grok will soon be integrated into Tesla’s autonomous driving systems, providing real-time decision support and predictive analytics for vehicle safety. This marks a significant expansion of Grok’s capabilities beyond conversational AI[2].\n\n### Claude (Anthropic)\nAnthropic has unveiled new safety and transparency features for Claude, including detailed model documentation and bias mitigation tools. These updates are part of a broader industry push for more accountable and explainable AI systems, especially in high-stakes applications[2].\n\n### Industry Trends and Regulation\nDecember 2025 has seen increased regulatory focus on AI ethics, with new requirements for transparency, bias reduction, and human oversight in AI systems. Companies are now required to document training data and decision-making processes, particularly for applications in hiring, finance, and healthcare[2].\n\nFor more details on these updates, refer to the following sources:\n- [Top AI News for December 2025: Breakthroughs, Launches ...][2]\n- [Chinese AI Chipmaker Soars On Trading Debut][3]\n- [Pope Leo on AI: new generations must be helped, not hindered][4]\n- [Softbank's Son says super AI could make humans like fish, win Nobel Prize]\n\nThese highlights cover the most significant recent developments across the major AI platforms and industry trends."
+              },
+              "delta": {
+                "role": "assistant",
+                "content": ""
+              },
+              "finish_reason": "stop"
+            }
+          ]
+        }
+      }
+    ],
+    "When chat message received": [
+      {
+        "json": {
+          "sessionId": "813160d7759b4531850449e3f920a608",
+          "action": "sendMessage",
+          "chatInput": "chat"
+        }
+      }
+    ],
+    "AI model to formatting": [
+      {
+        "json": {
+          "id": "resp_078d19f06962bd23006932c48c8a30819da2d2201436151d6d",
+          "object": "response",
+          "created_at": 1764934796,
+          "status": "completed",
+          "background": false,
+          "billing": {
+            "payer": "developer"
+          },
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": null,
+          "max_tool_calls": null,
+          "model": "gpt-4o-mini-2024-07-18",
+          "output": [
+            {
+              "id": "msg_078d19f06962bd23006932c48cdc1c819daea1d0d9413a175a",
+              "type": "message",
+              "status": "completed",
+              "content": [
+                {
+                  "type": "output_text",
+                  "annotations": [],
+                  "logprobs": [],
+                  "text": "Here is the latest AI development news. Today is 2025-12-05T00:00:00.000+00:00.\n\n---\n\n**Thanks for subscribing to AI Buddy Tamil!** \n\nWe’re excited to bring you the latest highlights from the AI world over the past 24 hours:\n\n### **ChatGPT and OpenAI**\nOpenAI has introduced new enterprise features for ChatGPT, enhancing security, compliance, and integration with major business platforms, making it ideal for regulated industries like finance and healthcare.\n\n### **Gemini and Google**\nGoogle’s Gemini AI platform has received a major update, featuring real-time multilingual translation and advanced sentiment analysis, aimed at improving customer service and content creation.\n\n### **Perplexity AI**\nPerplexity AI has launched a research assistant feature that integrates with academic databases, allowing users to generate summaries and citations directly within the platform.\n\n### **Deepseek**\nDeepseek has released Deepseek-V3, a new version of its large language model with improved reasoning capabilities and reduced computational requirements, now available for commercial use.\n\n### **Grok (xAI)**\nElon Musk’s xAI announced that Grok will be integrated into Tesla’s autonomous driving systems, enhancing vehicle safety with real-time decision support.\n\n### **Claude (Anthropic)**\nAnthropic unveiled new safety and transparency features for Claude, aimed at increasing accountability and explainability in AI systems.\n\n### **Industry Trends and Regulation**\nDecember 2025 brings heightened regulatory focus on AI ethics, emphasizing transparency, bias reduction, and human oversight in critical applications.\n\nFor more detailed insights, you can explore additional resources that discuss recent breakthroughs and industry perspectives.\n\n---\n\nThank you for staying updated with AI Buddy Tamil! We appreciate your interest in the evolving landscape of artificial intelligence."
+                }
+              ],
+              "role": "assistant"
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": null,
+          "prompt_cache_key": null,
+          "prompt_cache_retention": null,
+          "reasoning": {
+            "effort": null,
+            "summary": null
+          },
+          "safety_identifier": null,
+          "service_tier": "default",
+          "store": true,
+          "temperature": 1,
+          "text": {
+            "format": {
+              "type": "text"
+            },
+            "verbosity": "medium"
+          },
+          "tool_choice": "auto",
+          "tools": [
+            {
+              "type": "function",
+              "description": "Get row(s) in sheet in Google Sheets",
+              "name": "Past_AI_News_logs",
+              "parameters": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              },
+              "strict": false
+            }
+          ],
+          "top_logprobs": 0,
+          "top_p": 1,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 859,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 356,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1215
+          },
+          "user": null,
+          "metadata": {}
+        }
+      }
+    ],
+    "Send a message": [
+      {
+        "json": {
+          "id": "19aee52189afff78",
+          "threadId": "19aee52189afff78",
+          "labelIds": [
+            "SENT"
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "AI model to formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Past AI News logs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI model to formatting",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI model to formatting": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a33f584f-2776-4bb0-930d-52f2fe6eca56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57e91f50fd75d1276b7bf42b613f7d60791b4929879127f0a5abce1541525931"
+  },
+  "id": "hOEUKC8kPIYFJf5R",
+  "tags": []
+}
