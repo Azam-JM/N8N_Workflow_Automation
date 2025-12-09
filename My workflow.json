@@ -1,0 +1,159 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "59b90398-0fc6-4aa2-8de3-1397d5139fe7",
+      "name": "When chat message received",
+      "webhookId": "cf184a8a-4ea3-47d3-adb9-b4e7956558c8"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a helpful email assistant, help me this the email input from user and professionalize it and send it to the Gmail tool"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e64f73e7-5f7d-43d8-ba78-6adb684428af",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 2
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        208
+      ],
+      "id": "5d688a8c-2a6b-40ba-885d-eb5c99321646",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        256
+      ],
+      "id": "06178d4d-7dfc-4641-a627-50d163cd18be",
+      "name": "Send a message in Gmail",
+      "webhookId": "d5f691d3-9971-4781-b7c7-3bd9fd2d3bee",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YEdsWlC7PxUc43z9",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        208
+      ],
+      "id": "6c80a4e0-b62d-4ee6-8ccd-5f1dcd3ca3a5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "bUIB0rewsJkey9U1",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9483c2de-ff14-4fca-94da-75db4719803f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57e91f50fd75d1276b7bf42b613f7d60791b4929879127f0a5abce1541525931"
+  },
+  "id": "4p9MzrgRa7wIP46k",
+  "tags": []
+}
