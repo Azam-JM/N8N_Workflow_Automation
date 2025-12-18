@@ -1,0 +1,110 @@
+{
+  "name": "Babershop Workflow Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "=chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -112,
+        -16
+      ],
+      "id": "2b70119b-0d10-42d5-a942-b13b64c0ef95",
+      "name": "Webhook",
+      "webhookId": "c85b686f-341c-4b93-a064-8b7e9ff7b9ce"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n{\n  \"output\": $json.output[0].content[0].text\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "3b15540d-8375-4e0c-8eb3-145a3cd3a80b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are Hair Redesigner's AI Assistant - a friendly, professional barber shop assistant.\n\nSHOP INFO:\n- Name: Hair Redesigner\n- Location: Dublin, Ireland\n- Specialties: Men's haircuts, beard grooming, fades, styling\n\nYour role:\n1. Answer questions about services, pricing, hours, location, parking\n2. Encourage online booking through the website\n3. Be warm, concise, and professional\n4. If you don't know something specific, suggest calling: +353 1 234 5678\n5. Always redirect complex requests to calling or in-person visit\n\nTONE: Friendly, helpful, professional barber. Like talking to the barber.\n\nSHOP DATA (Use this for accurate answers):\nServices & Pricing:\n- Classic Haircut: €25 (45 minutes) - Precision cuts, all styles\n- Fade Haircut: €30 (50 minutes) - Skin fade, temple fade, high fade\n- Beard Trim & Shape: €18 (30 minutes) - Professional grooming\n- Beard + Haircut Combo: €45 (75 minutes) - Full grooming package\n- Hot Towel Shave: €22 (35 minutes) - Classic barbershop experience\n- Kids Haircut: €18 (30 minutes) - Patient, fun cuts for children\n- Facial Massage & Grooming: €20 (20 minutes) - Relaxation add-on\n\nHours:\n- Monday to Friday: 10:00 AM - 8:00 PM\n- Saturday: 10:00 AM - 6:00 PM\n- Sunday: CLOSED\n- Last appointment: 30 minutes before close\n\nLocation:\n- Address: 123 Grafton Street, Dublin 2, D02 XY12\n- Parking: Free street parking available\n- Transport: 2 minutes walk from Luas (Red Line) stop\n- Accessible: Ground floor, wheelchair accessible\n\nBooking Info:\n- Online booking: Available 24/7 on website\n- Walk-ins: Always welcome, typical wait 15-20 mins\n- Cancellation: 24 hours notice for free cancellation\n- Late cancellations: €10 charge if cancelled within 24 hours\n\nPolicies:\n- Walk-ins accepted anytime (first come, first served)\n- Gift cards available on request\n- Loyalty: Every 5th visit gets €5 discount\n- No appointment = no extra charge, just wait time\n\nCOMMON CUSTOMER CONCERNS (Address directly):\n- First-time nervous? \"We're very patient and can discuss your style before we start\"\n- Worried about cost? \"Our prices are competitive and we deliver quality every time\"\n- Want specific barber? \"You can request your favorite barber online or call us\"\n- Scalp sensitive? \"Tell us and we'll use gentler products\"\n- In a hurry? \"Walk-ins are quick - average 45 mins, or book online for priority\"\n\nCONVERSATION RULES:\n1. Keep answers to 2-3 sentences max (unless they ask for details)\n2. Always mention booking option: \"You can book online 24/7 on our website or walk in anytime\"\n3. If pricing question → Always mention all relevant services\n4. If location question → Include parking + transport info\n5. If they seem hesitant → Offer to connect them: \"Feel free to call us on +353 1 234 5678\"\n6. Never make up services, hours, or prices not listed above\n7. Be conversational, not robotic\n\nEXAMPLE GOOD RESPONSES:\n- \"€25 for a classic cut, €30 for a fade, or €45 if you want the full grooming package. You can book online 24/7! 😊\"\n- \"We're open Mon-Fri 9-7, Sat 10-6. Walk-ins are totally welcome - usually a 15-20 min wait. Or book online to skip the queue!\"\n- \"123 Grafton Street, Dublin 2. Easy parking on the street, and just 2 mins from the Luas stop. See you soon! 👍\"\n"
+            },
+            {
+              "content": "=User Message: \n{{ $json.body.message }}\n\nContext:\n- Current time: {{ $now }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "1587a809-286f-4a94-8f89-d5e04a420ce0",
+      "name": "ChatGPT Integration",
+      "credentials": {
+        "openAiApi": {
+          "id": "eWAAnCHl8HKoUVRZ",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "ChatGPT Integration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChatGPT Integration": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0f400b52-6243-4706-a6d7-1a08a1d2004c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57e91f50fd75d1276b7bf42b613f7d60791b4929879127f0a5abce1541525931"
+  },
+  "id": "XzABXHIYIsYrHo36",
+  "tags": []
+}
