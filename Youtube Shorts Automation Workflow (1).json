@@ -1,0 +1,520 @@
+{
+  "name": "Youtube Shorts Automation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1uOIAFvhH3ySYBaa2xaVz2gxKDT4aLZ1Q",
+          "mode": "list",
+          "cachedResultName": "Youtube_Shorts",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1uOIAFvhH3ySYBaa2xaVz2gxKDT4aLZ1Q"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        16
+      ],
+      "id": "64f8f3dd-bd16-4fcd-9477-200e7d8dbc12",
+      "name": "Google Drive Trigger",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "OkLKiIIiN9kJt6Ax",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -896,
+        16
+      ],
+      "id": "22a94d9d-f82c-4f14-a18d-0aeb452152bc",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "eWAAnCHl8HKoUVRZ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Here is the transcript of a new video:\n\"{{ $json.text }}\"\n\nPlease generate the metadata JSON for this YouTube Short following these STRICT rules:\n\n### 1. TITLE (Max 95 Characters)\n- Write a mind-blowing, high-clickbait hook (English/Tamil mixed is okay if relevant).\n- **Mandatory Hashtags:** Try to include `#shorts #shortsvideo #ai #tamil` at the end.\n- **Space Logic:** The total length MUST be under 95 characters.\n  - If Title + All Hashtags > 95 chars, remove `#tamil`.\n  - If still > 95 chars, remove `#ai`.\n  - If still > 95 chars, remove `#shortsvideo`.\n  - **NEVER** remove `#shorts`.\n\n### 2. DESCRIPTION\n- Write an exciting 3-sentence summary of the video.\n- **Mandatory:** You MUST include the sentence: \"Subscribe to AI Buddy Tamil for more daily AI updates!\"\n- Add 3-5 extra relevant hashtags at the bottom (different from the title).\n\n### 3. TAGS (Max Optimization)\n- Generate a comma-separated list of high-volume search keywords.\n- **CRITICAL:** The list must be **between 400 and 480 characters** total.\n- **RULE:** Each individual tag must be SHORT (under 50 characters). Do not write long sentences.\n- Include specific tags like: \"AI Buddy Tamil, Artificial Intelligence, AI Tools, Tech in Tamil\".\n\n### OUTPUT FORMAT\nReturn ONLY this raw JSON structure (no markdown formatting):\n{\n  \"title\": \"Your Title Here\",\n  \"description\": \"Your Description Here\",\n  \"tags\": \"tag1, tag2, tag3, ...\"\n}"
+            },
+            {
+              "role": "system",
+              "content": "You are a YouTube SEO Expert and Viral Content Strategist for the channel \"AI Buddy Tamil\". Your goal is to maximize CTR (Click Through Rate) and search discoverability. You speak in a tone that is exciting, professional, and encourages engagement. You always output strict JSON."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        16
+      ],
+      "id": "6c78e0c2-da89-4a41-ae29-47fe9e8bb0bf",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "eWAAnCHl8HKoUVRZ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1168,
+        208
+      ],
+      "id": "967ab249-062a-4ee6-9502-3f27b635a44e",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "OkLKiIIiN9kJt6Ax",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "outputFormat": "mp3",
+        "additionalOptions": "={ \"audio_bitrate\": 64 }"
+      },
+      "type": "@cloudconvert/n8n-nodes-cloudconvert.cloudConvert",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        16
+      ],
+      "id": "dac1f72b-fcdd-4f8d-b96d-44114aa68e05",
+      "name": "CloudConvert",
+      "credentials": {
+        "cloudConvertOAuth2Api": {
+          "id": "MUOGw4LbpgG4C5ot",
+          "name": "CloudConvert account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E",
+          "mode": "list",
+          "cachedResultName": "Shorts Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts Automation Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Video ID",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1488,
+        16
+      ],
+      "id": "6566bf9f-459f-4eff-a398-d0581b30a27e",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HJcFdK2nje2Aipwq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "15f97531-a70f-4d86-93e7-c6770749ef9f",
+              "leftValue": "={{ $json[\"Video ID\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1328,
+        32
+      ],
+      "id": "ebfdde7e-aaf1-4784-a32b-2eee17a0f581",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the text from the AI model\nconst aiText = $input.first().json.output[0].content[0].text\n\n// Clean up the markdown code blocks\nconst cleanJson = aiText.replace(/```json/g, \"\").replace(/```/g, \"\").trim();\n\n// Convert text to real data\nconst metadata = JSON.parse(cleanJson);\n\n// --- 🛡️ SAFETY FIX FOR YOUTUBE TAGS ---\nif (metadata.tags) {\n  // 1. Split the string into a list of tags\n  let tagList = metadata.tags.split(',');\n  \n  // 2. Clean each tag and remove any that are too long (YouTube Max: 100 chars per tag)\n  tagList = tagList.map(t => t.trim()).filter(t => t.length > 0 && t.length < 100);\n  \n  // 3. Join them back into a clean comma-separated string\n  metadata.tags = tagList.join(',');\n}\n\nreturn [{\n  json: metadata\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        16
+      ],
+      "id": "00b4c2b7-82a3-4e1a-b5f3-d86bb5c5f412",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -192,
+        16
+      ],
+      "id": "2d4987a4-514a-4e84-981e-4b49371195d3",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $json.title }}",
+        "options": {
+          "description": "={{ $json.description }}",
+          "privacyStatus": "private",
+          "tags": "={{ $json.tags }}"
+        }
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b00aa9cd-543b-4a67-af61-0004ebb11b9d",
+      "name": "Upload a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "hA79RYKKcXoMvvRO",
+          "name": "YouTube account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E",
+          "mode": "list",
+          "cachedResultName": "Shorts Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Shorts Automation Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kTMKmWSKKpffwH0oxIK0na7tTCVo_e5sOwpYzt1tv1E/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Video ID": "={{ $('Google Drive Trigger').item.json.id }}",
+            "Filename": "={{ $('Google Drive Trigger').item.json.name }}",
+            "Title": "={{ $('Code in JavaScript').item.json.title }}",
+            "Description": "={{ $('Code in JavaScript').item.json.description }}",
+            "Tags": "={{ $('Code in JavaScript').item.json.tags }}",
+            "Status": "Uploaded",
+            "YouTube URL": "={{ $json.uploadId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Video ID",
+              "displayName": "Video ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Filename",
+              "displayName": "Filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "YouTube URL",
+              "displayName": "YouTube URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "35711f5e-5e9b-47f6-a560-4bfe971ee5ac",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HJcFdK2nje2Aipwq",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "CloudConvert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "CloudConvert": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a video": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1b91a968-935b-407b-81c6-6d78f34ed2e9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57e91f50fd75d1276b7bf42b613f7d60791b4929879127f0a5abce1541525931"
+  },
+  "id": "I9q6BryfEAXSnUCz",
+  "tags": []
+}
