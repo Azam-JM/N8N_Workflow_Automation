@@ -20,8 +20,8 @@
         "headerParameters": {
           "parameters": [
             {
-              "name": "X-Goog-Api-Key",
-              "value": "AIzaSyAXmhz0_XbyD-RjRzqUvaC-NIZVsMjBw8Y"
+              "name": "X-Dummy",
+              "value": "jksadkskf"
             },
             {
               "name": "X-Goog-FieldMask",
