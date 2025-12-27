@@ -1,0 +1,226 @@
+{
+  "name": "Barber saloon Locator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "09fea7cb-4300-49d2-9a45-80be02842a85",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://places.googleapis.com/v1/places:searchText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Goog-Api-Key",
+              "value": "AIzaSyAXmhz0_XbyD-RjRzqUvaC-NIZVsMjBw8Y"
+            },
+            {
+              "name": "X-Goog-FieldMask",
+              "value": "places.displayName,places.formattedAddress,places.websiteUri,places.internationalPhoneNumber"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "textQuery",
+              "value": "Barber shops in Lucan, Dublin"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28ea7224-2a9b-4a4b-8e49-ebd907f1cd08",
+      "name": "Google Places Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -304,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "places",
+        "options": {}
+      },
+      "id": "0cc63bd8-ce5e-42ba-8ec4-061e4e57ed81",
+      "name": "Split into Items",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1luyJ8v_NHNU0Uiup3j0Lsbrc4SMobGW0VI_kC6eCyAo",
+          "mode": "list",
+          "cachedResultName": "Barber Saloon Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1luyJ8v_NHNU0Uiup3j0Lsbrc4SMobGW0VI_kC6eCyAo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Saloon Leads 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1luyJ8v_NHNU0Uiup3j0Lsbrc4SMobGW0VI_kC6eCyAo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.displayName.text }}",
+            "Phone": "={{ $json.internationalPhoneNumber }}",
+            "Address": "={{ $json.formattedAddress }}",
+            "Website Status": "={{ $json.websiteUri }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website Status",
+              "displayName": "Website Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "945a942d-32e6-49cc-b0d1-0373d24a825c",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        352,
+        48
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aFdo4saWfUt7xPKN",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop through every barber found\nreturn items.filter(item => {\n  const site = item.json.websiteUri;\n\n  // 1. If \"websiteUri\" doesn't exist at all -> KEEP IT (This catches Charlie)\n  if (!site) return true;\n\n  // 2. If \"websiteUri\" is just an empty text -> KEEP IT\n  if (site === \"\") return true;\n\n  // 3. If they use Facebook or Instagram as their \"website\" -> KEEP IT\n  // (These are great leads because they need a real site)\n  if (site.toLowerCase().includes('facebook.com')) return true;\n  if (site.toLowerCase().includes('instagram.com')) return true;\n\n  // Otherwise (they have a real site or Booksy link) -> TRASH IT\n  return false;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        48
+      ],
+      "id": "1c6f88b6-3ca7-46b3-a7f3-6b39b5499638",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Google Places Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Places Search": {
+      "main": [
+        [
+          {
+            "node": "Split into Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split into Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d7b67598-0dda-4f46-892d-1eed4806f677",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "57e91f50fd75d1276b7bf42b613f7d60791b4929879127f0a5abce1541525931"
+  },
+  "id": "oE8FO59SEJWXJV6v",
+  "tags": []
+}
